@@ -1,0 +1,52 @@
+#include <Wire.h>
+ #include <LiquidCrystal_I2C.h>
+
+ // initialize LCD object with I2C address and size
+ LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+ // set input pin for frequency measurement
+ const int inputPin = 2;
+
+// variables to store frequency and time
+ volatile unsigned long frequency;
+ unsigned long time;
+ void setup() {
+
+// initialize LCD with I2C address
+ Serial.begin(9600);
+ lcd.begin();
+ lcd.backlight();
+
+// set up input pin as input
+ pinMode(inputPin, INPUT);
+
+// attach interrupt to input pin
+ attachInterrupt(digitalPinToInterrupt(inputPin), measureFrequency, RISING);
+ }
+
+ void loop() {
+
+// clear LCD screen
+ lcd.clear();
+
+// display frequency on LCD
+ lcd.setCursor(0, 0);
+ lcd.print("Frequency: ");
+ lcd.setCursor(0, 1);
+ lcd.print(frequency);
+ lcd.print("Hz");
+ delay(1500);
+ }
+
+void measureFrequency() {
+
+// calculate time since last interrupt
+ unsigned long currentTime = micros();
+ unsigned long elapsedTime = currentTime -time;
+
+// calculate frequency
+ frequency = 1000000 / elapsedTime;
+
+// store current time for next interrupt
+ time =currentTime;
+ }
